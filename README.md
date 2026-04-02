@@ -1,4 +1,4 @@
-# PILCO in Modern Python
+# PILCO in Python
 
 This repo contains two readable reproductions built from the original MATLAB `pilcoV0.9` code and the referenced papers:
 
@@ -107,5 +107,32 @@ Assistive training writes to `artifacts/assistive/` by default:
 The reconstructions were based on:
 
 - the pendulum scenario files, especially `settings_pendulum.m`, `dynamics_pendulum.m`, `loss_pendulum.m`, and `pendulum_learn.m`
-- the paper [`doc/Deisenroth et al. - 2015 - Gaussian Processes for Data-Efficient Learning in Robotics and Control.pdf`](./doc/Deisenroth%20et%20al.%20-%202015%20-%20Gaussian%20Processes%20for%20Data-Efficient%20Learning%20in%20Robotics%20and%20Control.pdf)
-- the paper [`doc/Hamaya et al. - 2017 - Learning assistive strategies for exoskeleton robots from user-robot physical interaction.pdf`](./doc/Hamaya%20et%20al.%20-%202017%20-%20Learning%20assistive%20strategies%20for%20exoskeleton%20robots%20from%20user-robot%20physical%20interaction.pdf)
+
+- Hamaya et al.:
+
+  ```bibtex
+  @article{hamaya2017learning,
+  title={Learning assistive strategies for exoskeleton robots from user-robot physical interaction},
+  author={Hamaya, Masashi and Matsubara, Takamitsu and Noda, Tomoyuki and Teramae, Tatsuya and Morimoto, Jun},
+  journal={Pattern Recognition Letters},
+  volume={99},
+  pages={67--76},
+  year={2017},
+  publisher={Elsevier}
+  }
+  ```
+
+- Deisenroth et al.:
+
+  ```bibtex
+  @article{deisenroth2013gaussian,
+  title={Gaussian processes for data-efficient learning in robotics and control},
+  author={Deisenroth, Marc Peter and Fox, Dieter and Rasmussen, Carl Edward},
+  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  volume={37},
+  number={2},
+  pages={408--423},
+  year={2015},
+  publisher={IEEE}
+  }
+  ```
