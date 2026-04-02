@@ -22,6 +22,8 @@ from .policy import PositiveMLPPolicy
 
 @dataclass(slots=True)
 class AssistiveRolloutPrediction:
+    """Compact summary of a model-predicted rollout."""
+
     mean: np.ndarray
     std: np.ndarray
     expected_total_cost: float
@@ -35,10 +37,14 @@ class AssistiveStrategyTrainer:
         self.output_dir = Path(config.training.output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
+        # The plant is the synthetic human-exoskeleton simulator used both for
+        # random data collection and for closed-loop evaluation rollouts.
         self.environment = AssistiveArmPlant(config.assistive_arm)
         self.rng = np.random.default_rng(config.assistive_arm.rollout_seed)
         torch.set_default_dtype(torch.float64)
 
+        # The policy consumes the current augmented state [q, qdot, Eb, Et]
+        # and outputs one scalar assist pressure.
         self.policy = PositiveMLPPolicy(
             input_dim=4,
             hidden_sizes=config.policy_optim.hidden_sizes,
@@ -51,10 +57,12 @@ class AssistiveStrategyTrainer:
         self._train_targets = np.zeros((0, 4), dtype=np.float64)
 
     def run(self) -> None:
+        # 1) Collect a small amount of random interaction data.
         for rollout_index in range(self.config.training.initial_random_rollouts):
             trajectory = self.environment.rollout(self.rng, policy=None)
             self._append_trajectory(trajectory)
 
+        # 2) Alternate between model fitting, policy improvement, and fresh rollouts.
         for episode in range(1, self.config.training.policy_episodes + 1):
             model = self._fit_dynamics_model()
             self._optimize_policy(model)
@@ -75,6 +83,8 @@ class AssistiveStrategyTrainer:
         self._write_history()
 
     def _fit_dynamics_model(self) -> IndependentGPDynamicsModel:
+        # The GP models state deltas, not absolute next states, matching the
+        # standard PILCO setup and making the one-step regression easier.
         model = IndependentGPDynamicsModel(jitter=self.config.dynamics.gp_jitter)
         model.fit(
             self._train_inputs,
@@ -141,6 +151,8 @@ class AssistiveStrategyTrainer:
         seed: int,
         require_grad: bool = False,
     ) -> tuple[np.ndarray, np.ndarray, torch.Tensor] | tuple[np.ndarray, np.ndarray, float]:
+        # Particle rollouts are the modern replacement for the analytic moment
+        # matching used in the original PILCO implementation.
         generator = torch.Generator(device="cpu")
         generator.manual_seed(seed)
 
@@ -157,6 +169,7 @@ class AssistiveStrategyTrainer:
         total_cost = torch.tensor(0.0, dtype=torch.get_default_dtype())
 
         for _ in range(self.config.assistive_arm.horizon_steps):
+            # Policy consumes the current augmented state and proposes assist pressure.
             actions = self.policy(particles).squeeze(-1)
             model_inputs = torch.cat((particles, actions[:, None]), dim=-1)
             delta_mean, delta_var = model.predict_torch(model_inputs)
@@ -168,6 +181,8 @@ class AssistiveStrategyTrainer:
 
             next_particles = particles + delta
             particles = torch.cat((next_particles[:, :2], torch.clamp(next_particles[:, 2:], 0.0, 1.0)), dim=-1)
+            # The only explicit task cost is muscle effort. Tracking enters
+            # indirectly through the user-intent model inside the environment.
             total_cost = total_cost + emg_effort_cost_torch(
                 particles,
                 biceps_weight=self.config.assistive_arm.biceps_cost_weight,
@@ -189,6 +204,8 @@ class AssistiveStrategyTrainer:
         nxt = trajectory.observed_states[1:]
         actions = trajectory.actions[:, None]
         deltas = nxt - current
+        # Each training input is [q, qdot, Eb, Et, pressure].
+        # Each target is the corresponding one-step state difference.
         self._train_inputs = np.vstack((self._train_inputs, np.hstack((current, actions))))
         self._train_targets = np.vstack((self._train_targets, deltas))
         self.trajectories.append(trajectory)

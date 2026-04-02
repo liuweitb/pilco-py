@@ -1,16 +1,14 @@
 [project]
 name = "pilco-py"
 version = "0.1.0"
-description = "Readable PILCO-style pendulum recreation using NumPy, PyTorch, GPyTorch, and MuJoCo."
+description = "Readable Hamaya-style assistive arm learning using NumPy, PyTorch, and GPyTorch."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "gpytorch>=1.14",
     "imageio>=2.37.0",
     "matplotlib>=3.10.0",
-    "mujoco>=3.2.7",
     "numpy>=2.1.0",
-    "scipy>=1.15.0",
     "torch>=2.6.0",
 ]
 

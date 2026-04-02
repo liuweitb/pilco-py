@@ -46,6 +46,8 @@ def save_assistive_rollout_diagnostics(
 ) -> None:
     time = np.arange(trajectory.actions.shape[0] + 1) * config.dt
 
+    # This figure mirrors the paper's rollout plots: tracking, assistance, EMG,
+    # and reward all on one page.
     figure, axes = plt.subplots(4, 1, figsize=(10, 12), constrained_layout=True)
     axes[0].plot(time, trajectory.reference_states[:, 0], linestyle="--", color="black", label="Reference angle")
     axes[0].plot(time, trajectory.latent_states[:, 0], color="tab:red", label="Observed angle")
@@ -101,6 +103,7 @@ def save_policy_and_interaction_maps(
     mean_eb = float(np.mean(trajectory.latent_states[:, 2]))
     mean_et = float(np.mean(trajectory.latent_states[:, 3]))
 
+    # Policy map: how much assistance is produced as angle and biceps effort change.
     angle_mesh, biceps_mesh = np.meshgrid(angle_grid, biceps_grid)
     policy_inputs = np.column_stack(
         (
@@ -118,6 +121,8 @@ def save_policy_and_interaction_maps(
             .reshape(angle_mesh.shape)
         )
 
+    # Interaction map: what the learned GP predicts for one-step EMG changes
+    # under different arm angles and robot pressures.
     angle_pressure_mesh, pressure_mesh = np.meshgrid(angle_grid, pressure_grid)
     interaction_inputs = np.column_stack(
         (
@@ -186,6 +191,8 @@ def save_assistive_animation(
 
         labels = ["Pressure", "Biceps", "Triceps"]
         values = [
+            # Normalize pressure so all three shared-control signals fit on the
+            # same 0..1 horizontal bar chart.
             trajectory.actions[min(step, len(trajectory.actions) - 1)] / config.max_pressure if step < len(trajectory.actions) else 0.0,
             state[2],
             state[3],

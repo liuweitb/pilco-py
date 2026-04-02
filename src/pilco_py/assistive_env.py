@@ -1,3 +1,8 @@
+'''
+Simulator
+'''
+
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -66,6 +71,11 @@ class AssistiveArmPlant:
         return self.config.max_pressure * abs(np.sin(0.5 * np.pi * t))
 
     def _desired_user_torque(self, q: float, qdot: float, step: int) -> float:
+        '''
+        Simulated user intent. 
+        Given the current robot state, return torque the user want to be applied.
+        '''
+        
         q_ref, qdot_ref, qddot_ref = self.reference_state(step)
         gravity = self.config.gravity_gain * np.sin(q)
         feedforward = self.config.inertia * qddot_ref + gravity + self.config.load_torque

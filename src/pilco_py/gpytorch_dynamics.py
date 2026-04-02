@@ -6,6 +6,8 @@ import torch
 
 
 class _SingleOutputDynamicsGP(gpytorch.models.ExactGP):
+    """Single-output exact GP used as one channel of the learned interaction model."""
+
     def __init__(
         self,
         train_x: torch.Tensor,
@@ -47,6 +49,8 @@ class IndependentGPDynamicsModel:
             likelihood = gpytorch.likelihoods.GaussianLikelihood()
             model = _SingleOutputDynamicsGP(x, train_y, likelihood)
 
+            # Sensible initialization matters a lot when each GP is trained from a
+            # fairly small batch of human-robot interaction data.
             initial_lengthscale = torch.clamp(x.std(dim=0), min=0.05)
             initial_outputscale = max(float(train_y.var().item()), 0.1)
             likelihood.noise = max(initial_outputscale * 0.05, 1e-4)

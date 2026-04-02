@@ -1,12 +1,6 @@
-"""Readable PILCO-style reproductions for pendulum control and assistive shared control."""
+"""Readable Hamaya-style assistive arm learning package."""
 
-from .config import AssistiveExperimentConfig, ExperimentConfig
 from .assistive_trainer import AssistiveStrategyTrainer
-from .trainer import PILCOPendulumTrainer
+from .config import AssistiveExperimentConfig
 
-__all__ = [
-    "AssistiveExperimentConfig",
-    "AssistiveStrategyTrainer",
-    "ExperimentConfig",
-    "PILCOPendulumTrainer",
-]
+__all__ = ["AssistiveExperimentConfig", "AssistiveStrategyTrainer"]
