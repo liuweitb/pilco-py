@@ -36,3 +36,24 @@ def pendulum_cost_torch(states: torch.Tensor, length: float, width: float) -> to
     target_tip = torch.tensor([0.0, length], dtype=states.dtype, device=states.device)
     distance_sq = torch.sum((tip - target_tip) ** 2, dim=-1)
     return 1.0 - torch.exp(-0.5 * distance_sq / (width**2))
+
+
+def emg_effort_cost_numpy(
+    states: np.ndarray,
+    biceps_weight: float,
+    triceps_weight: float,
+    width: float,
+) -> np.ndarray:
+    states = np.asarray(states, dtype=np.float64)
+    effort = biceps_weight * states[..., 2] ** 2 + triceps_weight * states[..., 3] ** 2
+    return 1.0 - np.exp(-0.5 * effort / (width**2))
+
+
+def emg_effort_cost_torch(
+    states: torch.Tensor,
+    biceps_weight: float,
+    triceps_weight: float,
+    width: float,
+) -> torch.Tensor:
+    effort = biceps_weight * states[..., 2] ** 2 + triceps_weight * states[..., 3] ** 2
+    return 1.0 - torch.exp(-0.5 * effort / (width**2))
