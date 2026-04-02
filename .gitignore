@@ -1,10 +1,7 @@
-# Python-generated files
+.cache/
+.mpl-cache/
+.uv-cache/
+.venv/
 __pycache__/
-*.py[oc]
-build/
-dist/
-wheels/
-*.egg-info
-
-# Virtual environments
-.venv
+*.pyc
+artifacts/

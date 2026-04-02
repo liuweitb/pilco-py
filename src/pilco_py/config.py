@@ -1,0 +1,80 @@
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass, field
+from pathlib import Path
+
+import numpy as np
+
+
+@dataclass(slots=True)
+class PendulumConfig:
+    dt: float = 0.1
+    horizon_seconds: float = 4.0
+    initial_state_mean: tuple[float, float] = (0.0, 0.0)
+    initial_state_covariance: tuple[tuple[float, float], tuple[float, float]] = (
+        (0.01, 0.0),
+        (0.0, 0.01),
+    )
+    length: float = 1.0
+    mass: float = 1.0
+    gravity: float = 9.82
+    damping: float = 0.01
+    max_torque: float = 2.5
+    measurement_noise_std: tuple[float, float] = (0.1, 0.01)
+    target_theta: float = float(np.pi)
+    cost_width: float = 0.5
+    rollout_seed: int = 5
+
+    @property
+    def horizon_steps(self) -> int:
+        return int(np.ceil(self.horizon_seconds / self.dt))
+
+    @property
+    def initial_mean_array(self) -> np.ndarray:
+        return np.asarray(self.initial_state_mean, dtype=np.float64)
+
+    @property
+    def initial_covariance_array(self) -> np.ndarray:
+        return np.asarray(self.initial_state_covariance, dtype=np.float64)
+
+    @property
+    def measurement_noise_array(self) -> np.ndarray:
+        return np.asarray(self.measurement_noise_std, dtype=np.float64)
+
+
+@dataclass(slots=True)
+class DynamicsConfig:
+    gp_train_steps: int = 150
+    gp_jitter: float = 1e-6
+
+
+@dataclass(slots=True)
+class PolicyOptimizationConfig:
+    hidden_sizes: tuple[int, int] = (64, 64)
+    learning_rate: float = 3e-2
+    adam_steps: int = 200
+    num_particles: int = 128
+    evaluation_particles: int = 512
+    common_random_seed: int = 23
+    use_model_uncertainty: bool = True
+    gradient_clip_norm: float = 10.0
+
+
+@dataclass(slots=True)
+class TrainingConfig:
+    initial_random_rollouts: int = 1
+    policy_episodes: int = 8
+    output_dir: Path = Path("artifacts/pendulum")
+    render_every_episode: bool = True
+    save_video: bool = True
+
+
+@dataclass(slots=True)
+class ExperimentConfig:
+    pendulum: PendulumConfig = field(default_factory=PendulumConfig)
+    dynamics: DynamicsConfig = field(default_factory=DynamicsConfig)
+    policy_optim: PolicyOptimizationConfig = field(default_factory=PolicyOptimizationConfig)
+    training: TrainingConfig = field(default_factory=TrainingConfig)
+
+    def as_dict(self) -> dict[str, object]:
+        return asdict(self)

@@ -1,7 +1,31 @@
 [project]
 name = "pilco-py"
 version = "0.1.0"
-description = "Add your description here"
+description = "Readable PILCO-style pendulum recreation using NumPy, PyTorch, GPyTorch, and MuJoCo."
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "gpytorch>=1.14",
+    "imageio>=2.37.0",
+    "matplotlib>=3.10.0",
+    "mujoco>=3.2.7",
+    "numpy>=2.1.0",
+    "scipy>=1.15.0",
+    "torch>=2.6.0",
+]
+
+[project.scripts]
+pilco-train = "pilco_py.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+package = true
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+    "ruff>=0.11.2",
+]

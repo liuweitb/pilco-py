@@ -1,5 +1,4 @@
-def main():
-    print("Hello from pilco-py!")
+from pilco_py.cli import main
 
 
 if __name__ == "__main__":
